@@ -44,9 +44,6 @@ void setup() {
     // Serial.begin(9600); // Open the serial port and set the baud rate to 115200
     // delay(1500);
     // mpu.initialize(); // Initialize MPU6050
-    // delay(2);
-    // balancecar.pwm1 = 0;
-    // balancecar.pwm2 = 0;
     /// 5ms timer interrupt setting, use timer2. Note: using timer2 will affect the PWM output of pin3 pin11,
     /// Because PWM uses a timer to control the duty cycle, when using a timer, pay attention to check the pin port of the corresponding timer.
     // MsTimer2::set(5, inter);
@@ -97,10 +94,10 @@ void moveMotor(bool motor, bool direction, int pwm) // set pwm between 0 - 255
 
 // the loop function runs over and over again forever
 void loop() {
-  moveMotor(true, true, 100)        // move motor 1
-  moveMotor(false, true, 100)       // move motor 2
-  delay(1000);                      // wait for a second
-  moveMotor(true, false, 100)       // move motor 1
-  moveMotor(false, false, 100)      // move motor 2
-  delay(1000);                      // wait for a second
+    moveMotor(true, true, 100)        // move motor 1
+    moveMotor(false, true, 100)       // move motor 2
+    delay(1000);                      // wait for a second
+    moveMotor(true, false, 100)       // move motor 1
+    moveMotor(false, false, 100)      // move motor 2
+    delay(1000);                      // wait for a second
 }
