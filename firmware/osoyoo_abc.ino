@@ -224,7 +224,7 @@ void setup() {
   pinMode(IN4M, OUTPUT);
   pinMode(PWMA, OUTPUT); // Left motor PWM
   pinMode(PWMB, OUTPUT); // Right motor PWM
-  pinMode(STBY, OUTPUT); //enable TB6612FNG
+  pinMode(STBY, OUTPUT); // enable TB6612FNG
   // Initialize the motor driver module
   digitalWrite(IN1M, 0);
   digitalWrite(IN2M, 1);
