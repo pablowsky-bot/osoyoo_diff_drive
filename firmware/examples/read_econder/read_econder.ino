@@ -2,6 +2,7 @@
 // #include "I2Cdev.h"
 
 #include <MsTimer2.h>
+#include <PinChangeInt.h>
 
 #define IN1M 7 // motor1
 #define IN2M 6 // motor 1
@@ -130,10 +131,10 @@ void loop() {
     attachInterrupt(0, Code_left, CHANGE);
     attachPinChangeInterrupt(PinA_right, Code_right, CHANGE);
 
-    moveMotor(true, true, 100)        // move motor 1
-    moveMotor(false, true, 100)       // move motor 2
-    delay(1000);                      // wait for a second
-    moveMotor(true, false, 100)       // move motor 1
-    moveMotor(false, false, 100)      // move motor 2
-    delay(1000);                      // wait for a second
+    moveMotor(true, true, 100);        // move motor 1
+    moveMotor(false, true, 100);       // move motor 2
+    delay(1000);                       // wait for a second
+    moveMotor(true, false, 100);       // move motor 1
+    moveMotor(false, false, 100);      // move motor 2
+    delay(1000);                       // wait for a second
 }
