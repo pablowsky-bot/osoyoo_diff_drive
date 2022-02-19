@@ -31,7 +31,7 @@ void loop()
     Serial.println(burp_right, DEC);
     delay(500);
 }
-    
+
 void burpcountleft()
 {
     burp_left++;
