@@ -1,3 +1,7 @@
+/*
+ * Example on how to move osoyoo motors
+ */
+
 #define IN1M 7 // motor1
 #define IN2M 6 // motor 1
 
