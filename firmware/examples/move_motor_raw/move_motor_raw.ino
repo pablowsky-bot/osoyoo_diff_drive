@@ -1,5 +1,5 @@
 /*
- * Example on how to move osoyoo motors
+ * Example on how to move osoyoo motors (TB6612FNG motor driver) without using a motor driver library
  */
 
 #define IN1M 7 // motor1
@@ -78,11 +78,13 @@ void moveMotor(bool motor, bool direction, int pwm) // set pwm between 0 - 255
 }
 
 // the loop function runs over and over again forever
-void loop() {
-    moveMotor(true, true, 255);        // move motor 1
-    moveMotor(false, true, 255);       // move motor 2
-    delay(1000);                       // wait for a second
-    moveMotor(true, false, 255);       // move motor 1
-    moveMotor(false, false, 255);      // move motor 2
-    delay(1000);                       // wait for a second
+void loop()
+{
+    moveMotor(true, true, 128);        // move motor 1 CW
+    moveMotor(false, true, 128);       // move motor 2 CCW
+    delay(1000);
+
+    moveMotor(true, false, 128);       // move motor 1 CW
+    moveMotor(false, false, 128);      // move motor 2 CCW
+    delay(1000);
 }
