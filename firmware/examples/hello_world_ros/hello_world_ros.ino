@@ -3,9 +3,6 @@
  * Prints "hello world!"
  */
 
-// Use the following line if you have a Leonardo or MKR1000
-//#define USE_USBCON
-
 #include <ros.h>
 #include <std_msgs/String.h>
 
