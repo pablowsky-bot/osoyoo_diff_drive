@@ -24,7 +24,7 @@ void setup()
     Serial.begin(9600);
     delay(300);
 }
-    
+
 void loop()
 {
     Serial.println(burp_left);
