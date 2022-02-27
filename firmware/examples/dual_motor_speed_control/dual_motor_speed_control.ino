@@ -80,7 +80,7 @@ void setup()
     digitalWrite(left_motor_encoder, HIGH); //use the internal pullup resistor
     digitalWrite(right_motor_encoder, HIGH); //use the internal pullup resistor
     PCintPort::attachInterrupt(left_motor_encoder, interruptCountLeft, CHANGE);
-   // PCintPort::attachInterrupt(right_motor_encoder, &interruptCountRight, CHANGE);
+    PCintPort::attachInterrupt(right_motor_encoder, interruptCountRight, CHANGE);  // problem!
 
     // initialize serial port at 9600 baud rate
     Serial.begin(9600);
@@ -113,7 +113,7 @@ void interruptCountRight()
     count_right++;
 }
 
-void  measureSpeed(double *left_speed, double *right_speed)
+void measureSpeed(double *left_speed, double *right_speed)
 {
     float delta_pulses_right = float(count_right);
     float delta_pulses_left = float(count_left);	
@@ -140,32 +140,22 @@ void  measureSpeed(double *left_speed, double *right_speed)
    *left_speed = (delta_pulses_left * 1000 * 2 * M_PI) / (delta_time * pulses_per_revolution);
 }
 
-/******** LOOP *********/
-
-/*
-void loop()
-{
-    left_motor.drive(100);
-
-    Serial.println(measureSpeed());
-    delay(300);
-}
-*/
-
 // PID
 void loop()
 {
+    right_motor.drive(200, 1000);
+    delay(300);
+    left_motor.drive(240, 1000);
+
     // update PID input
-   // measureSpeed(&speed_sensor_l, &speed_sensor_r);
+    // measureSpeed(&speed_sensor_l, &speed_sensor_r);
     // calculate required PWM to match the desired speed
-   // leftPID.Compute();
-  // rightPID.Compute();
+    // leftPID.Compute();
+    // rightPID.Compute();
     // cast PID double precision floating point output to int
     // send PID output to motor
-    right_motor.drive(200);
-    left_motor.drive(240);
-  //  int int_output = int(double_pid_output_r);
-  //  right_motor.drive(int_output);
+    //  int int_output = int(double_pid_output_r);
+    //  right_motor.drive(int_output);
     //left_motor.drive((int)double_pid_output_l);
 
     // debug info (remove)
@@ -176,5 +166,5 @@ void loop()
     // Serial.println("PID output :");
     // Serial.println(int_pid_output);
 
-    delay(ctrl_delay);
+    // delay(ctrl_delay);
 }
