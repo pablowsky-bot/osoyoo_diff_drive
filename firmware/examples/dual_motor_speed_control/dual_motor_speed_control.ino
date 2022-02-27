@@ -12,21 +12,21 @@
 
 // motors
 
-#define LEFT_MOTOR_DIR_0 7          // motor 1 H-bridge direction
-#define LEFT_MOTOR_DIR_1 6          // motor 1 H-bridge direction
+#define LEFT_MOTOR_DIR_0 13         // motor 1 H-bridge direction
+#define LEFT_MOTOR_DIR_1 12         // motor 1 H-bridge direction
 
-#define RIGHT_MOTOR_DIR_0 13        // motor 2 H-bridge direction
-#define RIGHT_MOTOR_DIR_1 12        // motor 2 H-bridge direction
+#define RIGHT_MOTOR_DIR_0 7         // motor 2 H-bridge direction
+#define RIGHT_MOTOR_DIR_1 6         // motor 2 H-bridge direction
 
-#define LEFT_MOTOR_PWM 9
-#define RIGHT_MOTOR_PWM 10
+#define LEFT_MOTOR_PWM 10
+#define RIGHT_MOTOR_PWM 9
 
 #define STBY 8                      // Digital output signal to enable/disable motor driver
 
 // encoders
 
-#define left_motor_encoder 2
-#define right_motor_encoder 4
+#define left_motor_encoder 4
+#define right_motor_encoder 2
 
 #define pulses_per_revolution 1235  // 1235 or 1236 very good already, 1236 slightly overshoots
 
@@ -91,14 +91,18 @@ void setup()
     // PID controller
 
     // limit the output of the PID controller between 0 and 255
-   // leftPID.SetOutputLimits(0, 255);
-   // rightPID.SetOutputLimits(0, 255);
+    leftPID.SetOutputLimits(0, 255);
+    rightPID.SetOutputLimits(0, 255);
 
     // turn the PID on
     leftPID.SetMode(AUTOMATIC);
     rightPID.SetMode(AUTOMATIC);
 
-    // not sure if this dealy is really needed
+    // sets the period, in Milliseconds, at which the calculation is performed
+    // leftPID.SetSampleTime(ctrl_delay);
+    // rightPID.SetSampleTime(ctrl_delay);
+
+    // not sure if this delay is really needed
     delay(300);
     Serial.println("setup complete");
 }
@@ -143,28 +147,24 @@ void measureSpeed(double *left_speed, double *right_speed)
 // PID
 void loop()
 {
-    right_motor.drive(200, 1000);
-    delay(300);
-    left_motor.drive(240, 1000);
-
     // update PID input
-    // measureSpeed(&speed_sensor_l, &speed_sensor_r);
+    measureSpeed(&speed_sensor_l, &speed_sensor_r);
     // calculate required PWM to match the desired speed
-    // leftPID.Compute();
-    // rightPID.Compute();
+    leftPID.Compute();
+    rightPID.Compute();
     // cast PID double precision floating point output to int
     // send PID output to motor
-    //  int int_output = int(double_pid_output_r);
-    //  right_motor.drive(int_output);
-    //left_motor.drive((int)double_pid_output_l);
+    int int_output = int(double_pid_output_r);
+    right_motor.drive(int_output);
+    left_motor.drive((int)double_pid_output_l);
 
     // debug info (remove)
     // Serial.println("setpoint :");
     // Serial.println(setpoint);
     // Serial.println("speed_sensor :");
-    // Serial.println(speed_sensor);
+    Serial.println(speed_sensor_r);
     // Serial.println("PID output :");
     // Serial.println(int_pid_output);
 
-    // delay(ctrl_delay);
+    delay(ctrl_delay);
 }
