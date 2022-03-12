@@ -7,7 +7,7 @@
 #include <SparkFun_TB6612.h> // TB6612FNG (motor driver / H-bridge chip) library to control the motors
 #include <PinChangeInt.h>    // library to read encoders as fast as possible with Arduino
 
-#include <odometry.h> // inverse and forward kinematics library for differential drive robot
+#include <diff_drive_kinematics.h> // inverse and forward kinematics library for differential drive robot
 
 #include <ros.h>
 #include <geometry_msgs/Twist.h>
@@ -58,19 +58,19 @@ volatile unsigned int count_right = 0;
 // measure elapsed time
 unsigned long last_time;
 
-//odometry
-float left_v;
-float right_v;
-float left_distance;
-float right_distance;
-float tetha;
-float rx;
-float ry;
+// robot kinematics
+double left_v = 0.0;        // PID input signal 1
+double right_v = 0.0;       // PID input signal 2
+float linear_v = 0.0;       // input robot linear speed in x direction
+float angular_v = 0.0;      // input robot angular speed
+float left_distance = 0.0;  // distance traveled by left wheel
+float right_distance = 0.0; // distance traveled by right wheel
+float tetha = 0.0;          // robot angular displacement
+float rx = 0.0;             // robot linear displacement
+float ry = 0.0;             // robot linear displacement
+Robot pablowsky(pulses_per_revolution, wheel_radius, distance_between_wheels);
 
 // PID
-
-double setpoint_l = 0.0;
-double setpoint_r = 0.0;
 
 double speed_sensor_l = 0.0;
 double speed_sensor_r = 0.0;
@@ -134,10 +134,6 @@ void setup()
     PCintPort::attachInterrupt(left_motor_encoder, interruptCountLeft, CHANGE);
     PCintPort::attachInterrupt(right_motor_encoder, interruptCountRight, CHANGE);  // problem!
 
-
-    //set up the odometry
-    Robot pablowsky(pulses_per_revolution, wheel_radius, distance_between_wheels);
-
     // initialize variable to measure speed
     last_time = millis();
 
@@ -200,7 +196,8 @@ void measureSpeed(double *left_speed, double *right_speed)
 
 void loop()
 {
-    pablowsky.InverseK(angular_v, linear_v, &left_v, &right_v); 
+    // map robot linear and angular velocity to motor speed
+    pablowsky.InverseK(angular_v, linear_v, left_v, right_v);
     // update PID input
     measureSpeed(&speed_sensor_l, &speed_sensor_r);
     // calculate required PWM to match the desired speed
@@ -208,14 +205,9 @@ void loop()
     rightPID.Compute();
     // cast PID double precision floating point output to int
     // send PID output to motor
-    int int_output = int(double_pid_output_r);
-    right_motor.drive(int_output);
+    right_motor.drive((int)double_pid_output_r);
     left_motor.drive((int)double_pid_output_l);
-	
-   //my changes
-   
 
- 
     delay(ctrl_delay);
 
     // listen to callbacks from ROS
