@@ -7,6 +7,8 @@
 #include <SparkFun_TB6612.h> // TB6612FNG (motor driver / H-bridge chip) library to control the motors
 #include <PinChangeInt.h>    // library to read encoders as fast as possible with Arduino
 
+#include <odometry.h> // inverse and forward kinematics library for differential drive robot
+
 #include <ros.h>
 #include <geometry_msgs/Twist.h>
 
@@ -31,6 +33,8 @@
 #define left_motor_encoder 4
 #define right_motor_encoder 2
 
+#define wheel_radius 0.0325
+#define distance_between_wheels  0.17
 #define pulses_per_revolution 1235  // 1235 or 1236 very good already, 1236 slightly overshoots
 
 /******** GLOBALS *********/
@@ -58,6 +62,15 @@ volatile unsigned int count_right = 0;
 // measure elapsed time
 unsigned long last_time;
 
+//odometry
+float left_v;
+float right_v;
+float left_distance;
+float right_distance;
+float tetha;
+float rx;
+float ry;
+
 // PID
 
 double setpoint_l = 0.0;
@@ -75,16 +88,16 @@ double ki = 150.0;
 double kd = 0.1;
 int ctrl_delay = 49;
 
-PID leftPID(&speed_sensor_l, &double_pid_output_l, &setpoint_l, kp, ki, kd, DIRECT);
-PID rightPID(&speed_sensor_r, &double_pid_output_r, &setpoint_r, kp, ki, kd, DIRECT);
+PID leftPID(&speed_sensor_l, &double_pid_output_l, &left_v, kp, ki, kd, DIRECT);
+PID rightPID(&speed_sensor_r, &double_pid_output_r, &right_v, kp, ki, kd, DIRECT);
 
 /******** FUNCTIONS *********/
 
 void cmdVelCb(const geometry_msgs::Twist& msg)
 {
     nh.loginfo("received twist msg");
-    setpoint_r = msg.linear.x;
-    setpoint_l = msg.angular.z;
+    linear_v = msg.linear.x;
+    angular_v = msg.angular.z;
 }
 
 ros::Subscriber<geometry_msgs::Twist> sub("cmd_vel", &cmdVelCb );
@@ -105,6 +118,10 @@ void setup()
     digitalWrite(right_motor_encoder, HIGH); //use the internal pullup resistor
     PCintPort::attachInterrupt(left_motor_encoder, interruptCountLeft, CHANGE);
     PCintPort::attachInterrupt(right_motor_encoder, interruptCountRight, CHANGE);  // problem!
+
+
+    //set up the odometry
+    Robot pablowsky(pulses_per_revolution, wheel_radius, distance_between_wheels);
 
     // initialize variable to measure speed
     last_time = millis();
@@ -168,6 +185,7 @@ void measureSpeed(double *left_speed, double *right_speed)
 
 void loop()
 {
+    pablowsky.InverseK(angular_v, linear_v, &left_v, &right_v); 
     // update PID input
     measureSpeed(&speed_sensor_l, &speed_sensor_r);
     // calculate required PWM to match the desired speed
@@ -178,7 +196,11 @@ void loop()
     int int_output = int(double_pid_output_r);
     right_motor.drive(int_output);
     left_motor.drive((int)double_pid_output_l);
+	
+   //my changes
+   
 
+ 
     delay(ctrl_delay);
 
     // listen to callbacks from ROS
