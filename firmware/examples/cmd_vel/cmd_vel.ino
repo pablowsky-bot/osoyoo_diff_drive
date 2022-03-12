@@ -45,15 +45,11 @@ ros::NodeHandle nh;
 
 // these constants are used to allow you to make your motor configuration
 // line up with function names like forward.  Value can be 1 or -1
-const int motor_offset_A = -1;
-const int motor_offset_B = -1;
 
 // Initializing motors.  The library will allow you to initialize as many
 // motors as you have memory for.  If you are using functions like forward
 // that take 2 motors as arguements you can either write new functions or
 // call the function more than once.
-Motor left_motor = Motor(LEFT_MOTOR_DIR_0, LEFT_MOTOR_DIR_1, LEFT_MOTOR_PWM, motor_offset_A, STBY);
-Motor right_motor = Motor(RIGHT_MOTOR_DIR_0, RIGHT_MOTOR_DIR_1, RIGHT_MOTOR_PWM, motor_offset_B, STBY);
 
 // encoder tick counters
 volatile unsigned int count_left = 0;
@@ -101,6 +97,25 @@ void cmdVelCb(const geometry_msgs::Twist& msg)
 }
 
 ros::Subscriber<geometry_msgs::Twist> sub("cmd_vel", &cmdVelCb );
+
+const int motor_offset_A;
+const int motor_offset_B;
+
+if (linear_v < 0)
+{
+  motor_offset_A = 1;
+  motor_offset_B = 1;
+}
+else
+{
+ motor_offset_A = -1;
+ motor_offset_B = -1; 
+
+}
+
+
+Motor left_motor = Motor(LEFT_MOTOR_DIR_0, LEFT_MOTOR_DIR_1, LEFT_MOTOR_PWM, motor_offset_A, STBY);
+Motor right_motor = Motor(RIGHT_MOTOR_DIR_0, RIGHT_MOTOR_DIR_1, RIGHT_MOTOR_PWM, motor_offset_B, STBY); 
 
 /******** SETUP *********/
 
