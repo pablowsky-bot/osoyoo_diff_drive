@@ -1,0 +1,7 @@
+<?xml version="1.0" ?>
+<launch>
+
+  <!-- arduino based serial communication (rosserial) -->
+  <node pkg="rosserial_python" type="serial_node.py" name="diff_drive_base_driver" args="/dev/ttyUSB0"/>
+
+</launch>
