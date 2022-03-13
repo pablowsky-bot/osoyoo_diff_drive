@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>osoyoo_diff_drive</name>
+  <version>0.0.0</version>
+  <description>Osooyo balance segway robot hacked into a diff drive robot</description>
+
+  <maintainer email="olima_84@yahoo.com">Oscar Lima</maintainer>
+
+  <license>BSD</license>
+
+  <!--   <build_depend>roscpp</build_depend> -->
+  <exec_depend>rosserial_python</exec_depend>
+  <buildtool_depend>catkin</buildtool_depend>
+
+</package>
