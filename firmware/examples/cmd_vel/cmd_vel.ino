@@ -26,6 +26,10 @@
 #define LEFT_MOTOR_PWM 10
 #define RIGHT_MOTOR_PWM 9
 
+#define FORWARD true
+#define BACKWARD false
+
+
 #define STBY 8               // Digital output signal to enable/disable motor driver
 
 // encoders
@@ -45,11 +49,18 @@ ros::NodeHandle nh;
 
 // these constants are used to allow you to make your motor configuration
 // line up with function names like forward.  Value can be 1 or -1
+const int motor_offset_A = -1;
+const int motor_offset_B = -1;
 
 // Initializing motors.  The library will allow you to initialize as many
 // motors as you have memory for.  If you are using functions like forward
 // that take 2 motors as arguements you can either write new functions or
 // call the function more than once.
+Motor left_motor = Motor(LEFT_MOTOR_DIR_0, LEFT_MOTOR_DIR_1, LEFT_MOTOR_PWM, motor_offset_A, STBY);
+Motor right_motor = Motor(RIGHT_MOTOR_DIR_0, RIGHT_MOTOR_DIR_1, RIGHT_MOTOR_PWM, motor_offset_B, STBY);
+
+//direction trigger
+bool trigger;
 
 // encoder tick counters
 volatile unsigned int count_left = 0;
@@ -91,31 +102,19 @@ PID rightPID(&speed_sensor_r, &double_pid_output_r, &right_v, kp, ki, kd, DIRECT
 
 void cmdVelCb(const geometry_msgs::Twist& msg)
 {
-    nh.loginfo("received twist msg");
     linear_v = msg.linear.x;
+    if (linear_v < 0)
+    {
+      linear_v = linear_v * -1;
+      trigger = BACKWARD;
+    }
+    else
+      trigger = FORWARD;
     angular_v = msg.angular.z;
+
 }
 
 ros::Subscriber<geometry_msgs::Twist> sub("cmd_vel", &cmdVelCb );
-
-const int motor_offset_A;
-const int motor_offset_B;
-
-if (linear_v < 0)
-{
-  motor_offset_A = 1;
-  motor_offset_B = 1;
-}
-else
-{
- motor_offset_A = -1;
- motor_offset_B = -1; 
-
-}
-
-
-Motor left_motor = Motor(LEFT_MOTOR_DIR_0, LEFT_MOTOR_DIR_1, LEFT_MOTOR_PWM, motor_offset_A, STBY);
-Motor right_motor = Motor(RIGHT_MOTOR_DIR_0, RIGHT_MOTOR_DIR_1, RIGHT_MOTOR_PWM, motor_offset_B, STBY); 
 
 /******** SETUP *********/
 
@@ -140,7 +139,7 @@ void setup()
     // PID controller
 
     // limit the output of the PID controller between 0 and 255
-    leftPID.SetOutputLimits(0, 255);
+    leftPID.SetOutputLimits(0,255);
     rightPID.SetOutputLimits(0, 255);
 
     // turn the PID on
@@ -188,8 +187,13 @@ void measureSpeed(double *left_speed, double *right_speed)
      *       delta_time [ms]           1 [sec]       pulses_per_revolution [pulses]
      */
     // return value is in : rad/sec
-   *right_speed = (delta_pulses_right * 1000 * 2 * M_PI) / (delta_time * pulses_per_revolution);
-   *left_speed = (delta_pulses_left * 1000 * 2 * M_PI) / (delta_time * pulses_per_revolution);
+    *right_speed = (delta_pulses_right * 1000 * 2 * M_PI) / (delta_time * pulses_per_revolution);
+    *left_speed = (delta_pulses_left * 1000 * 2 * M_PI) / (delta_time * pulses_per_revolution);
+    if (!trigger)
+    {
+        //*right_speed = -*right_speed;
+        //*left_speed = -*left_speed;
+    }
 }
 
 /******** LOOP *********/
@@ -205,6 +209,11 @@ void loop()
     rightPID.Compute();
     // cast PID double precision floating point output to int
     // send PID output to motor
+    if (!trigger)
+    {
+      double_pid_output_r = -(int)double_pid_output_r;
+      double_pid_output_l = -(int)double_pid_output_l;
+    }
     right_motor.drive((int)double_pid_output_r);
     left_motor.drive((int)double_pid_output_l);
 
