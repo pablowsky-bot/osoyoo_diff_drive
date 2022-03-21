@@ -27,6 +27,6 @@ void Robot::ComputePose(float left_distance, float right_distance, float &tetha,
 
 void Robot::InverseK(float angular_v, float linear_v, double &left_v, double &right_v)
 {
-    left_v = (double)(2*linear_v - angular_v*distance_between_wheels_) / (2*wheel_radius_);
-    right_v = (double)(2*linear_v + angular_v*distance_between_wheels_) / (2*wheel_radius_);
+    left_v  = (double) (2 * linear_v - angular_v * distance_between_wheels_) / (2 * wheel_radius_);
+    right_v = (double) (2 * linear_v + angular_v * distance_between_wheels_) / (2 * wheel_radius_);
 }
