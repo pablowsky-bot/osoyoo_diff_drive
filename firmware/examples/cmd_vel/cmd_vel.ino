@@ -1,5 +1,5 @@
 /*
- * WIP: subscribe to cmd_vel topic and move the motors accordingly
+ * Subscribe to cmd_vel topic and move the motors accordingly
  */
 
 /******** INCLUDE *********/
