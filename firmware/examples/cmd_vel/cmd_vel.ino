@@ -189,11 +189,6 @@ void measureSpeed(double *left_speed, double *right_speed)
     // return value is in : rad/sec
     *right_speed = (delta_pulses_right * 1000 * 2 * M_PI) / (delta_time * pulses_per_revolution);
     *left_speed = (delta_pulses_left * 1000 * 2 * M_PI) / (delta_time * pulses_per_revolution);
-    if (!trigger)
-    {
-        //*right_speed = -*right_speed;
-        //*left_speed = -*left_speed;
-    }
 }
 
 /******** LOOP *********/
