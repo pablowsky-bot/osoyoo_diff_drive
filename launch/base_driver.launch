@@ -2,6 +2,9 @@
 <launch>
 
   <!-- arduino based serial communication (rosserial) -->
-  <node pkg="rosserial_python" type="serial_node.py" name="diff_drive_base_driver" args="/dev/pablowsky/arduino"/>
+  <node pkg="rosserial_python" type="serial_node.py" name="diff_drive_base_driver" args="/dev/pablowsky/arduino" output="screen"/>
+
+  <!-- odom republisher, arduino uno cannot handle odom_msg but a lightweigth odom version -->
+  <node pkg="osoyoo_diff_drive" type="odom_repub.py" name="odom_repub" output="screen"/>
 
 </launch>
