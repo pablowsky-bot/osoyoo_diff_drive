@@ -16,7 +16,7 @@ odom_msg.pose.pose.position.z = 0.0
 odom_msg.pose.pose.orientation.x = 0.0
 odom_msg.pose.pose.orientation.y = 0.0
 odom_msg.pose.pose.orientation.z = 0.0
-odom_msg.pose.pose.orientation.w = 0.0
+odom_msg.pose.pose.orientation.w = 1.0
 
 # odom_msg.pose.covariance = []
 
@@ -24,6 +24,7 @@ odom_pub = rospy.Publisher('odom', Odometry, queue_size=1)
 
 def callback(msg):
     odom_msg.pose.pose.position.x = msg.x
+    odom_msg.pose.pose.position.y = msg.y
     quaternion = tf.transformations.quaternion_from_euler(0.0, 0.0, msg.theta)
     odom_msg.pose.pose.orientation.x = quaternion[0]
     odom_msg.pose.pose.orientation.y = quaternion[1]
