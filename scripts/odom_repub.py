@@ -31,6 +31,10 @@ def callback(msg):
     odom_msg.pose.pose.orientation.z = quaternion[2]
     odom_msg.pose.pose.orientation.w = quaternion[3]
     odom_pub.publish(odom_msg)
+    # broadcast tf from odom to base_footprint
+    br = tf.TransformBroadcaster()
+    br.sendTransform((msg.x, msg.y, 0.0), quaternion,
+                     rospy.Time.now(), 'base_footprint', 'odom')
 
 def odom_repub():
     rospy.init_node('odom_repub', anonymous=True)
