@@ -14,6 +14,9 @@ class Robot
     float pulses_per_revolution_;
     float wheel_radius_;
     float distance_between_wheels_;
+    long int prev_ticks_right_;
+    long int prev_ticks_left_;
+    float wheel_circumference_;
 };
 
 #endif
