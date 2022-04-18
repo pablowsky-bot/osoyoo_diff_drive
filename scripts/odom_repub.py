@@ -18,13 +18,13 @@ odom_msg.pose.pose.orientation.y = 0.0
 odom_msg.pose.pose.orientation.z = 0.0
 odom_msg.pose.pose.orientation.w = 1.0
 
-odom_msg.twist.linear.x = 0.0
-odom_msg.twist.linear.y = 0.0
-odom_msg.twist.linear.z = 0.0
+odom_msg.twist.twist.linear.x = 0.0
+odom_msg.twist.twist.linear.y = 0.0
+odom_msg.twist.twist.linear.z = 0.0
 
-odom_msg.twist.angular.x = 0.0
-odom_msg.twist.angular.y = 0.0
-odom_msg.twist.angular.z = 0.0
+odom_msg.twist.twist.angular.x = 0.0
+odom_msg.twist.twist.angular.y = 0.0
+odom_msg.twist.twist.angular.z = 0.0
 
 # odom_msg.pose.covariance = []
 
@@ -40,14 +40,14 @@ def lightOdomCallback(msg):
     odom_msg.pose.pose.orientation.z = quaternion[2]
     odom_msg.pose.pose.orientation.w = quaternion[3]
     # fill sensed robot speed
-    odom_msg.twist.linear.x = msg.vx
-    odom_msg.twist.linear.y = msg.vy
-    odom_msg.twist.angular.z = msg.vtheta
+    odom_msg.twist.twist.linear.x = msg.vx
+    odom_msg.twist.twist.linear.y = msg.vy
+    odom_msg.twist.twist.angular.z = msg.vtheta
     # publish
     odom_pub.publish(odom_msg)
     # broadcast tf from odom to base_footprint
     br = tf.TransformBroadcaster()
-    br.sendTransform((msg.x, msg.y, 0.0), quaternion,
+    br.sendTransform((msg.rx, msg.ry, 0.0), quaternion,
                      rospy.Time.now(), 'base_footprint', 'odom')
 
 def odom_repub():
