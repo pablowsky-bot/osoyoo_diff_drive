@@ -13,7 +13,7 @@
 
 #include <ros.h>
 #include <geometry_msgs/Twist.h>
-#include <geometry_msgs/Pose2D.h>   // nav_msgs/Odometry is too big for Arduino dynamic memory
+#include <osoyoo_diff_drive/lightOdom.h>   // nav_msgs/Odometry is too big for Arduino dynamic memory
 
 #include <math.h>
 #include <PID_v1.h>                 // control library to achieve motor speed as fast as possible
@@ -51,8 +51,8 @@
 ros::NodeHandle nh;
 
 // setup odom pub
-geometry_msgs::Pose2D pose_msg;
-ros::Publisher odom_pub("lightweight_odom", &pose_msg);
+osoyoo_diff_drive::lightOdom light_odom_msg;
+ros::Publisher odom_pub("lightweight_odom", &light_odom_msg);
 
 // motors
 
@@ -177,7 +177,7 @@ void interruptCountRight()
   count_right++;
 }
 
-void measureSpeed(double *left_speed, double *right_speed)
+void measureSpeed(double &left_speed, double &right_speed)
 {
   float delta_pulses_right = float(count_right - count_right_old);
   float delta_pulses_left = float(count_left - count_left_old);
@@ -200,8 +200,8 @@ void measureSpeed(double *left_speed, double *right_speed)
    *       delta_time [ms]           1 [sec]       pulses_per_revolution [pulses]
    */
   // return values are in : rad/sec
-  *right_speed = (delta_pulses_right * 1000 * 2 * M_PI) / (delta_time * pulses_per_revolution);
-  *left_speed  = (delta_pulses_left  * 1000 * 2 * M_PI) / (delta_time * pulses_per_revolution);
+  right_speed = (delta_pulses_right * 1000 * 2 * M_PI) / (delta_time * pulses_per_revolution);
+  left_speed  = (delta_pulses_left  * 1000 * 2 * M_PI) / (delta_time * pulses_per_revolution);
 }
 
 /******** LOOP *********/
@@ -212,7 +212,7 @@ void loop()
   pablowsky.InverseK(angular_v, linear_v, left_v, right_v);
 
   // update PID input
-  measureSpeed(&speed_sensor_l, &speed_sensor_r);
+  measureSpeed(speed_sensor_l, speed_sensor_r);
 
   // calculate required PWM to match the desired speed
   leftPID.Compute();
@@ -234,10 +234,18 @@ void loop()
 
   // compute robot pose (Odometry)
   pablowsky.ComputePose(left_distance, right_distance, rtetha, rx, ry);
-  pose_msg.x = rx;
-  pose_msg.y = ry;
-  pose_msg.theta = rtetha;
-  odom_pub.publish( &pose_msg );
+  light_odom_msg.rx = rx;
+  light_odom_msg.ry = ry;
+  light_odom_msg.r_theta = rtetha;
+
+  // compute robot speed from wheel speed (Odometry)
+  float robot_vx, robot_vy, robot_vtheta = 0.0;
+  pablowsky.ForwardK(speed_sensor_l, speed_sensor_r, rtetha, robot_vtheta, robot_vx, robot_vy);
+  light_odom_msg.vx = robot_vx;
+  light_odom_msg.vy = robot_vy;
+  light_odom_msg.vtheta = robot_vtheta;
+
+  odom_pub.publish( &light_odom_msg );
 
   delay(ctrl_delay);
 
