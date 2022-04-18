@@ -3,7 +3,7 @@
 import rospy
 import tf
 from nav_msgs.msg import Odometry
-from geometry_msgs.msg import Pose2D
+from osoyoo_diff_drive.msg import lightOdom
 
 odom_msg = Odometry()
 
@@ -18,29 +18,43 @@ odom_msg.pose.pose.orientation.y = 0.0
 odom_msg.pose.pose.orientation.z = 0.0
 odom_msg.pose.pose.orientation.w = 1.0
 
+odom_msg.twist.twist.linear.x = 0.0
+odom_msg.twist.twist.linear.y = 0.0
+odom_msg.twist.twist.linear.z = 0.0
+
+odom_msg.twist.twist.angular.x = 0.0
+odom_msg.twist.twist.angular.y = 0.0
+odom_msg.twist.twist.angular.z = 0.0
+
 # odom_msg.pose.covariance = []
 
 odom_pub = rospy.Publisher('odom', Odometry, queue_size=1)
 
-def callback(msg):
-    odom_msg.pose.pose.position.x = msg.x
-    odom_msg.pose.pose.position.y = msg.y
-    quaternion = tf.transformations.quaternion_from_euler(0.0, 0.0, msg.theta)
+def lightOdomCallback(msg):
+    # fill robot sensed position (computed from encoder data)
+    odom_msg.pose.pose.position.x = msg.rx
+    odom_msg.pose.pose.position.y = msg.ry
+    quaternion = tf.transformations.quaternion_from_euler(0.0, 0.0, msg.r_theta)
     odom_msg.pose.pose.orientation.x = quaternion[0]
     odom_msg.pose.pose.orientation.y = quaternion[1]
     odom_msg.pose.pose.orientation.z = quaternion[2]
     odom_msg.pose.pose.orientation.w = quaternion[3]
+    # fill sensed robot speed
+    odom_msg.twist.twist.linear.x = msg.vx
+    odom_msg.twist.twist.linear.y = msg.vy
+    odom_msg.twist.twist.angular.z = msg.vtheta
+    # publish
     odom_pub.publish(odom_msg)
     # broadcast tf from odom to base_footprint
     br = tf.TransformBroadcaster()
-    br.sendTransform((msg.x, msg.y, 0.0), quaternion,
+    br.sendTransform((msg.rx, msg.ry, 0.0), quaternion,
                      rospy.Time.now(), 'base_footprint', 'odom')
 
 def odom_repub():
     rospy.init_node('odom_repub', anonymous=True)
     rospy.loginfo('pablowsky odom repub node started')
-    rospy.Subscriber('lightweight_odom', Pose2D, callback)
-    # prevent node from dying, but at the same time listens to callbacks
+    rospy.Subscriber('lightweight_odom', lightOdom, lightOdomCallback)
+    # prevent node from dying, allowing callback execution
     rospy.spin()
 
 if __name__ == '__main__':
